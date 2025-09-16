@@ -3,6 +3,32 @@
 **Full-Stack 여행 상품 쇼핑몰 시스템**
 Spring Boot 백엔드 + React 프론트엔드 구조
 
+## 🛠 기술 스택
+
+### Backend
+- **Framework**: Spring Boot, Spring MVC
+- **Database**: MySQL
+- **ORM**: JPA/Hibernate
+- **Authentication**: Spring Security (Session 기반)
+- **Build Tool**: Maven/Gradle
+
+### Frontend
+- **Framework**: React
+- **State Management**: Context API
+- **UI Framework**: Vapor (Goorm Design System)
+- **Build Tool**: Vite/Create React App
+
+### DevOps & Deployment
+- **Cloud Platform**: AWS
+- **Database**: AWS RDS
+- **Hosting**: AWS EC2/Elastic Beanstalk
+- **Storage**: AWS S3 (이미지 업로드)
+
+### Testing
+- **Backend**: JUnit, MockMvc
+- **Frontend**: Jest, React Testing Library
+- **Integration**: Postman/Insomnia
+
 ## 📋 프로젝트 개발 로드맵
 
 ### 1. 프로젝트 기초 설정
