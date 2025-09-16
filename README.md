@@ -33,8 +33,8 @@ Spring Boot 백엔드 + React 프론트엔드 구조
 
 ### 1. 프로젝트 기초 설정
 - [ ] 프로젝트 설계 및 기획 문서 작성
-- [ ] Spring Boot + React 프로젝트 세팅 (Spring MVC, DB 등)
 - [ ] 기능 명세서 및 DB 설계
+- [ ] Spring Boot + React 프로젝트 세팅 (Spring MVC, DB 등)
 
 ### 2. 백엔드 개발 (Spring Boot)
 - [ ] DB 연동 및 테이블 스키마 작성
