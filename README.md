@@ -7,7 +7,7 @@ Spring Boot 백엔드 + React 프론트엔드 구조
 
 ### Backend
 - **Framework**: Spring Boot, Spring MVC
-- **Database**: MySQL
+- **Database**: h2
 - **ORM**: JPA/Hibernate
 - **Authentication**: Spring Security (Session 기반)
 - **Build Tool**: Maven/Gradle
