@@ -1,1 +1,61 @@
-/.idea/
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backend (Spring Boot)
+backend/target/
+backend/*.jar
+backend/*.war
+backend/*.nar
+backend/hs_err_pid*
+backend/*.log
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/bin/
+backend/build/
+
+# Frontend (React)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/package-lock.json
+frontend/yarn.lock
+
+# Database
+*.sql
+*.sqlite
+*.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+
+# Temporary files
+*.tmp
+*.temp

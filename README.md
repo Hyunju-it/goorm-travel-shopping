@@ -29,12 +29,90 @@ Spring Boot 백엔드 + React 프론트엔드 구조
 - **Frontend**: Jest, React Testing Library
 - **Integration**: Postman/Insomnia
 
+## 📁 프로젝트 구조
+
+```
+goorm-travel-shopping/
+├── docs/                          # 📋 기획 문서들
+│   ├── project-planning.md        # 프로젝트 설계 및 기획
+│   ├── functional-specification.md # 기능 명세서
+│   └── database-design.md         # DB 설계서
+├── backend/                       # 🌸 Spring Boot 백엔드
+│   ├── pom.xml                   # Maven 설정
+│   └── src/main/
+│       ├── java/com/goorm/travelshopping/
+│       │   ├── TravelShoppingApplication.java
+│       │   ├── config/           # 설정 클래스
+│       │   ├── controller/       # REST 컨트롤러
+│       │   ├── service/          # 비즈니스 로직
+│       │   ├── repository/       # 데이터 접근 계층
+│       │   ├── entity/           # JPA 엔티티
+│       │   ├── dto/              # 데이터 전송 객체
+│       │   ├── security/         # 보안 설정
+│       │   └── exception/        # 예외 처리
+│       └── resources/
+│           └── application.yml    # Spring Boot 설정
+└── frontend/                      # ⚛️ React 프론트엔드
+    ├── package.json              # npm 설정
+    ├── vite.config.js            # Vite 설정
+    ├── index.html                # HTML 템플릿
+    └── src/
+        ├── main.jsx              # 앱 엔트리 포인트
+        ├── App.jsx               # 메인 컴포넌트
+        ├── contexts/             # Context API (상태관리)
+        │   ├── AuthContext.jsx   # 인증 상태
+        │   └── CartContext.jsx   # 장바구니 상태
+        ├── components/           # 재사용 컴포넌트
+        │   └── layout/           # 레이아웃 컴포넌트
+        │       ├── Header.jsx    # 헤더
+        │       └── Footer.jsx    # 푸터
+        ├── pages/               # 페이지 컴포넌트
+        │   ├── Home.jsx         # 메인 페이지
+        │   ├── Products.jsx     # 상품 목록
+        │   ├── ProductDetail.jsx # 상품 상세
+        │   ├── Cart.jsx         # 장바구니
+        │   ├── Login.jsx        # 로그인
+        │   ├── Register.jsx     # 회원가입
+        │   ├── MyPage.jsx       # 마이페이지
+        │   └── Admin.jsx        # 관리자
+        ├── services/            # API 호출
+        ├── hooks/               # 커스텀 훅
+        ├── utils/               # 유틸리티 함수
+        ├── assets/              # 이미지, 아이콘
+        └── styles/              # CSS 스타일
+            ├── index.css         # 글로벌 스타일
+            └── App.css           # 앱 스타일
+```
+
+## 🚀 프로젝트 실행 방법
+
+### Backend (Spring Boot)
+```bash
+cd backend
+mvn spring-boot:run
+# 또는
+mvn clean install
+java -jar target/travel-shopping-1.0.0.jar
+```
+
+### Frontend (React)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 전체 개발 환경 실행
+1. Backend: http://localhost:8080
+2. Frontend: http://localhost:3000
+3. API: http://localhost:8080/api
+
 ## 📋 프로젝트 개발 로드맵
 
 ### 1. 프로젝트 기초 설정
-- [ ] 프로젝트 설계 및 기획 문서 작성
-- [ ] 기능 명세서 및 DB 설계
-- [ ] Spring Boot + React 프로젝트 세팅 (Spring MVC, DB 등)
+- [x] 프로젝트 설계 및 기획 문서 작성
+- [x] 기능 명세서 및 DB 설계
+- [x] Spring Boot + React 프로젝트 세팅 (Spring MVC, DB 등)
 
 ### 2. 백엔드 개발 (Spring Boot)
 - [ ] DB 연동 및 테이블 스키마 작성
