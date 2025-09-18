@@ -10,6 +10,11 @@ export async function fetchOrders() {
   return response.data
 }
 
+export async function fetchAllOrders() {
+  const response = await apiClient.get('/orders/admin/all')
+  return response.data
+}
+
 export async function fetchOrderDetail(orderNumber) {
   const response = await apiClient.get(`/orders/${orderNumber}`)
   return response.data

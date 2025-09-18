@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchOrders, updateOrderStatus } from '../services/orderService'
+import { fetchAllOrders, updateOrderStatus } from '../services/orderService'
 import {
   createProduct,
   deleteProduct,
@@ -90,7 +90,7 @@ function Admin() {
       try {
         setOrderLoading(true)
         setOrderFeedback(null)
-        const data = await fetchOrders()
+        const data = await fetchAllOrders()
         setOrders(data)
       } catch (error) {
         setOrderFeedback({ type: 'danger', message: error.message || '주문 목록을 불러오지 못했습니다.' })
@@ -155,7 +155,7 @@ function Admin() {
         paymentStatus: orderPaymentSelections[orderNumber] || null,
       })
       setOrderFeedback({ type: 'success', message: `${orderNumber} 주문 상태가 갱신되었습니다.` })
-      const refreshed = await fetchOrders()
+      const refreshed = await fetchAllOrders()
       setOrders(refreshed)
     } catch (error) {
       setOrderFeedback({ type: 'danger', message: error.message || '주문 상태 갱신에 실패했습니다.' })

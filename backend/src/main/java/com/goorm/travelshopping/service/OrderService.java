@@ -125,6 +125,13 @@ public class OrderService {
                 .toList();
     }
 
+    public List<OrderSummaryResponse> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
+                .map(this::mapToSummaryResponse)
+                .toList();
+    }
+
     @Transactional(value = jakarta.transaction.Transactional.TxType.SUPPORTS)
     public OrderDetailResponse getOrderDetail(User user, String orderNumber) {
         Order order = orderRepository.findDetailByOrderNumber(orderNumber)

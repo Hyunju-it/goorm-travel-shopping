@@ -92,8 +92,11 @@ public class CartService {
     }
 
     private void validateStock(Product product, int requested) {
+        if (product.getStockQuantity() == 0) {
+            throw new BadRequestException("죄송합니다. 해당 상품은 현재 품절되었습니다.");
+        }
         if (requested > product.getStockQuantity()) {
-            throw new BadRequestException("재고가 부족합니다.");
+            throw new BadRequestException("재고가 부족합니다. 현재 재고: " + product.getStockQuantity() + "개");
         }
     }
 

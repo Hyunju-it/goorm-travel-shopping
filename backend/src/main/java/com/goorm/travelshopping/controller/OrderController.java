@@ -45,6 +45,12 @@ public class OrderController {
         return orderService.getMyOrders(userService.getActiveUser(userDetails.getId()));
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderSummaryResponse> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
     @GetMapping("/{orderNumber}")
     public OrderDetailResponse getOrderDetail(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @PathVariable String orderNumber) {

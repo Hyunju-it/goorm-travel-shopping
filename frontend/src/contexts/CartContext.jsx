@@ -93,6 +93,15 @@ export function CartProvider({ children }) {
       return { success: false, error: '상품 정보가 올바르지 않습니다.' }
     }
 
+    // 재고 검증
+    if (product.stockQuantity === 0) {
+      return { success: false, error: '죄송합니다. 해당 상품은 현재 품절되었습니다.' }
+    }
+
+    if (quantity > product.stockQuantity) {
+      return { success: false, error: `재고가 부족합니다. 현재 재고: ${product.stockQuantity}개` }
+    }
+
     if (!isAuthenticated) {
       const guestItems = readGuestCart()
       const existingIndex = guestItems.findIndex((item) => item.id === product.id)

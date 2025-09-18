@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
   fetchCurrentUser,
   login as loginRequest,
@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
     init()
   }, [])
 
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     setState((prev) => ({ ...prev, error: null }))
     try {
       const response = await loginRequest(credentials)
@@ -51,17 +51,17 @@ export function AuthProvider({ children }) {
       setState((prev) => ({ ...prev, error: message, isAuthenticated: false }))
       return { success: false, error: message }
     }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutRequest()
     } finally {
       setState({ ...initialState, isLoading: false })
     }
-  }
+  }, [])
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     try {
       const response = await registerRequest(userData)
       if (response.success) {
@@ -71,7 +71,11 @@ export function AuthProvider({ children }) {
     } catch (error) {
       return { success: false, error: error.message || '회원가입 중 오류가 발생했습니다.' }
     }
-  }
+  }, [])
+
+  const setError = useCallback((error) => {
+    setState((prev) => ({ ...prev, error }))
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -82,9 +86,9 @@ export function AuthProvider({ children }) {
       login,
       logout,
       register,
-      setError: (error) => setState((prev) => ({ ...prev, error })),
+      setError,
     }),
-    [state]
+    [state, login, logout, register, setError]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

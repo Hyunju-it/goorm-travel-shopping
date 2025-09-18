@@ -32,6 +32,18 @@ function ProductDetail() {
 
   const handleAddToCart = async () => {
     if (!product) return
+
+    // 재고 검증
+    if (product.stockQuantity === 0) {
+      alert('죄송합니다. 해당 상품은 현재 품절되었습니다.')
+      return
+    }
+
+    if (quantity > product.stockQuantity) {
+      alert(`재고가 부족합니다. 현재 재고: ${product.stockQuantity}개`)
+      return
+    }
+
     const result = await addToCart(product, quantity)
     if (result.success) {
       setFeedback('장바구니에 상품이 추가되었습니다.')
