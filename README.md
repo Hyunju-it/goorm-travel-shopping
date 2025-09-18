@@ -90,6 +90,9 @@ goorm-travel-shopping/
 ```bash
 cd backend
 mvn spring-boot:run
+```
+
+```bash
 # 또는
 mvn clean install
 java -jar target/travel-shopping-1.0.0.jar
@@ -101,6 +104,10 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### 🔐 테스트 계정 정보
+- 관리자: `admin@travelshop.com` / `admin123`
+- 일반 사용자: `user@test.com` / `user123`
 
 ### 전체 개발 환경 실행
 1. Backend: http://localhost:8080
@@ -115,24 +122,23 @@ npm run dev
 - [x] Spring Boot + React 프로젝트 세팅 (Spring MVC, DB 등)
 
 ### 2. 백엔드 개발 (Spring Boot)
-- [ ] DB 연동 및 테이블 스키마 작성
-- [ ] Spring CRUD 기능 구현
-- [ ] 서비스/DAO/컨트롤러 계층 로직 구현
-- [ ] 회원가입 및 로그인 기능 구현
-- [ ] 사용자 인증 및 권한 관리 (세션 및 유효성 검사 처리)
-- [ ] 주문 및 결제 로직 구현 (백엔드)
+- [x] DB 연동 및 테이블 스키마 작성
+- [x] Spring CRUD 기능 구현
+- [x] 서비스/DAO/컨트롤러 계층 로직 구현
+- [x] 회원가입 및 로그인 기능 구현
+- [x] 사용자 인증 및 권한 관리 (세션 및 유효성 검사 처리)
+- [x] 주문 및 결제 로직 구현 (백엔드)
 
 ### 3. 프론트엔드 개발 (React)
-- [ ] 상품 리스트 UI 구현 및 스타일링
-- [ ] Context API 상태관리 도입
-- [ ] 상품 관리 UI 및 기능 구현
-- [ ] 상품 검색 및 필터 기능 구현
-- [ ] Vapor(Goorm Design System) 학습하고 적용하기
+- [x] 상품 리스트 UI 구현 및 스타일링
+- [x] Context API 상태관리 도입
+- [x] 상품 관리 UI 및 기능 구현
+- [x] 상품 검색 및 필터 기능 구현
 
 ### 4. 테스트 및 검증
-- [ ] 테스트 코드 및 시나리오 작성
-- [ ] 테스트 자동화 및 기능 검증
-- [ ] 전체 흐름 테스트 및 시나리오 구성
+- [x] 테스트 코드 및 시나리오 작성
+- [x] 테스트 자동화 및 기능 검증
+- [x] 전체 흐름 테스트 및 시나리오 구성
 
 ### 5. 배포 및 문서화
 - [ ] AWS 배포 환경 구성

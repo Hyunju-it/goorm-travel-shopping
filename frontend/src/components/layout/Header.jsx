@@ -23,8 +23,7 @@ function Header() {
         <nav>
           <ul className="nav-links">
             <li><Link to="/products">상품</Link></li>
-            <li><Link to="/categories">카테고리</Link></li>
-            {isAuthenticated && user?.role === 'ADMIN' && (
+                        {isAuthenticated && user?.role === 'ADMIN' && (
               <li><Link to="/admin">관리자</Link></li>
             )}
           </ul>
@@ -63,7 +62,7 @@ function Header() {
                   position: 'absolute',
                   top: '-8px',
                   right: '-8px',
-                  backgroundColor: 'var(--error-color)',
+                  backgroundColor: '#b91c1c',
                   color: 'white',
                   borderRadius: '50%',
                   width: '20px',

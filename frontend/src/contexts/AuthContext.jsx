@@ -1,123 +1,91 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  fetchCurrentUser,
+  login as loginRequest,
+  logout as logoutRequest,
+  register as registerRequest,
+} from '../services/authService'
 
-const AuthContext = createContext()
+const AuthContext = createContext(null)
 
 const initialState = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
-}
-
-function authReducer(state, action) {
-  switch (action.type) {
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-        isLoading: false,
-      }
-    case 'LOGOUT':
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      }
-    case 'SET_LOADING':
-      return {
-        ...state,
-        isLoading: action.payload,
-      }
-    default:
-      return state
-  }
+  error: null,
 }
 
 export function AuthProvider({ children }) {
-  const [state, dispatch] = useReducer(authReducer, initialState)
+  const [state, setState] = useState(initialState)
 
   useEffect(() => {
-    // 페이지 로드 시 로그인 상태 확인
-    checkAuthStatus()
+    async function init() {
+      try {
+        const response = await fetchCurrentUser()
+        if (response.success && response.user) {
+          setState({ user: response.user, isAuthenticated: true, isLoading: false, error: null })
+        } else {
+          setState((prev) => ({ ...prev, isLoading: false }))
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, isLoading: false }))
+      }
+    }
+
+    init()
   }, [])
 
-  const checkAuthStatus = async () => {
-    try {
-      // TODO: API 호출로 현재 사용자 정보 확인
-      dispatch({ type: 'SET_LOADING', payload: false })
-    } catch (error) {
-      dispatch({ type: 'SET_LOADING', payload: false })
-    }
-  }
-
   const login = async (credentials) => {
+    setState((prev) => ({ ...prev, error: null }))
     try {
-      // TODO: 로그인 API 호출
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-        credentials: 'include',
-      })
-
-      if (response.ok) {
-        const user = await response.json()
-        dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+      const response = await loginRequest(credentials)
+      if (response.success && response.user) {
+        setState({ user: response.user, isAuthenticated: true, isLoading: false, error: null })
         return { success: true }
-      } else {
-        return { success: false, error: '로그인에 실패했습니다.' }
       }
+      const message = response.message || '로그인에 실패했습니다.'
+      setState((prev) => ({ ...prev, error: message, isAuthenticated: false }))
+      return { success: false, error: message }
     } catch (error) {
-      return { success: false, error: '네트워크 오류가 발생했습니다.' }
+      const message = error.message || '로그인 중 오류가 발생했습니다.'
+      setState((prev) => ({ ...prev, error: message, isAuthenticated: false }))
+      return { success: false, error: message }
     }
   }
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
-      dispatch({ type: 'LOGOUT' })
-    } catch (error) {
-      console.error('로그아웃 오류:', error)
-      dispatch({ type: 'LOGOUT' })
+      await logoutRequest()
+    } finally {
+      setState({ ...initialState, isLoading: false })
     }
   }
 
   const register = async (userData) => {
     try {
-      // TODO: 회원가입 API 호출
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      })
-
-      if (response.ok) {
+      const response = await registerRequest(userData)
+      if (response.success) {
         return { success: true }
-      } else {
-        const errorData = await response.json()
-        return { success: false, error: errorData.message || '회원가입에 실패했습니다.' }
       }
+      return { success: false, error: response.message || '회원가입에 실패했습니다.' }
     } catch (error) {
-      return { success: false, error: '네트워크 오류가 발생했습니다.' }
+      return { success: false, error: error.message || '회원가입 중 오류가 발생했습니다.' }
     }
   }
 
-  const value = {
-    user: state.user,
-    isAuthenticated: state.isAuthenticated,
-    isLoading: state.isLoading,
-    login,
-    logout,
-    register,
-  }
+  const value = useMemo(
+    () => ({
+      user: state.user,
+      isAuthenticated: state.isAuthenticated,
+      isLoading: state.isLoading,
+      error: state.error,
+      login,
+      logout,
+      register,
+      setError: (error) => setState((prev) => ({ ...prev, error })),
+    }),
+    [state]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

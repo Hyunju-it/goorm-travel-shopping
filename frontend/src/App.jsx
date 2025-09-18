@@ -12,6 +12,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import MyPage from './pages/MyPage'
 import Admin from './pages/Admin'
+import OrderDetail from './pages/OrderDetail'
 import './styles/App.css'
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/mypage" element={<MyPage />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/orders/:orderNumber" element={<OrderDetail />} />
               </Routes>
             </main>
             <Footer />

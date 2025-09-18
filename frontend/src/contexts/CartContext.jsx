@@ -1,137 +1,209 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  addCartItem,
+  clearCart as clearCartRequest,
+  fetchCart,
+  removeCartItem,
+  updateCartItem,
+} from '../services/cartService'
+import { useAuth } from './AuthContext'
 
-const CartContext = createContext()
+const CartContext = createContext(null)
+
+const LOCAL_STORAGE_KEY = 'travel_shop_guest_cart'
 
 const initialState = {
   items: [],
   totalAmount: 0,
   totalQuantity: 0,
+  isLoading: false,
+  error: null,
 }
 
-function cartReducer(state, action) {
-  switch (action.type) {
-    case 'ADD_TO_CART': {
-      const existingItemIndex = state.items.findIndex(
-        (item) => item.id === action.payload.id
-      )
+function calculateTotals(items) {
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
+  const totalAmount = items.reduce((sum, item) => sum + Number(item.subtotal || item.price * item.quantity), 0)
+  return {
+    totalQuantity,
+    totalAmount,
+  }
+}
 
-      let updatedItems
-      if (existingItemIndex >= 0) {
-        // 이미 존재하는 상품의 수량 증가
-        updatedItems = state.items.map((item, index) =>
-          index === existingItemIndex
-            ? { ...item, quantity: item.quantity + action.payload.quantity }
-            : item
-        )
-      } else {
-        // 새 상품 추가
-        updatedItems = [...state.items, action.payload]
-      }
-
-      return {
-        ...state,
-        items: updatedItems,
-        totalQuantity: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalAmount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      }
+function readGuestCart() {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (!stored) {
+      return []
     }
+    return JSON.parse(stored)
+  } catch (error) {
+    console.error('게스트 장바구니 로드 오류:', error)
+    return []
+  }
+}
 
-    case 'REMOVE_FROM_CART': {
-      const updatedItems = state.items.filter((item) => item.id !== action.payload)
-      return {
-        ...state,
-        items: updatedItems,
-        totalQuantity: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalAmount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      }
-    }
-
-    case 'UPDATE_QUANTITY': {
-      const updatedItems = state.items.map((item) =>
-        item.id === action.payload.id
-          ? { ...item, quantity: Math.max(0, action.payload.quantity) }
-          : item
-      ).filter((item) => item.quantity > 0)
-
-      return {
-        ...state,
-        items: updatedItems,
-        totalQuantity: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
-        totalAmount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      }
-    }
-
-    case 'CLEAR_CART':
-      return initialState
-
-    case 'LOAD_CART':
-      return {
-        ...state,
-        items: action.payload,
-        totalQuantity: action.payload.reduce((sum, item) => sum + item.quantity, 0),
-        totalAmount: action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      }
-
-    default:
-      return state
+function writeGuestCart(items) {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items))
+  } catch (error) {
+    console.error('게스트 장바구니 저장 오류:', error)
   }
 }
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState)
+  const { isAuthenticated } = useAuth()
+  const [state, setState] = useState(initialState)
 
-  // 로컬 스토리지에서 장바구니 로드
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
+    loadCart()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
+
+  const loadCart = async () => {
+    if (isAuthenticated) {
       try {
-        const cartData = JSON.parse(savedCart)
-        dispatch({ type: 'LOAD_CART', payload: cartData })
+        setState((prev) => ({ ...prev, isLoading: true, error: null }))
+        const response = await fetchCart()
+        const { totalAmount, totalQuantity } = calculateTotals(response.items)
+        setState({
+          items: response.items,
+          totalAmount,
+          totalQuantity,
+          isLoading: false,
+          error: null,
+        })
       } catch (error) {
-        console.error('장바구니 데이터 로드 오류:', error)
+        setState((prev) => ({ ...prev, isLoading: false, error: error.message || '장바구니를 불러오지 못했습니다.' }))
       }
+    } else {
+      const guestItems = readGuestCart()
+      const { totalAmount, totalQuantity } = calculateTotals(guestItems)
+      setState({
+        items: guestItems,
+        totalAmount,
+        totalQuantity,
+        isLoading: false,
+        error: null,
+      })
     }
-  }, [])
-
-  // 장바구니 상태 변경 시 로컬 스토리지에 저장
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state.items))
-  }, [state.items])
-
-  const addToCart = (product, quantity = 1) => {
-    dispatch({
-      type: 'ADD_TO_CART',
-      payload: {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.mainImageUrl,
-        quantity,
-      },
-    })
   }
 
-  const removeFromCart = (productId) => {
-    dispatch({ type: 'REMOVE_FROM_CART', payload: productId })
+  const addToCart = async (product, quantity = 1) => {
+    if (!product?.id) {
+      return { success: false, error: '상품 정보가 올바르지 않습니다.' }
+    }
+
+    if (!isAuthenticated) {
+      const guestItems = readGuestCart()
+      const existingIndex = guestItems.findIndex((item) => item.id === product.id)
+      if (existingIndex >= 0) {
+        guestItems[existingIndex].quantity += quantity
+        guestItems[existingIndex].subtotal = guestItems[existingIndex].price * guestItems[existingIndex].quantity
+      } else {
+        guestItems.push({
+          id: product.id,
+          name: product.name,
+          price: Number(product.effectivePrice || product.price || 0),
+          quantity,
+          imageUrl: product.mainImageUrl,
+          subtotal: Number(product.effectivePrice || product.price || 0) * quantity,
+        })
+      }
+      writeGuestCart(guestItems)
+      setState((prev) => {
+        const updated = calculateTotals(guestItems)
+        return {
+          ...prev,
+          items: guestItems,
+          totalAmount: updated.totalAmount,
+          totalQuantity: updated.totalQuantity,
+        }
+      })
+      return { success: true }
+    }
+
+    try {
+      await addCartItem(product.id, quantity)
+      await loadCart()
+      return { success: true }
+    } catch (error) {
+      const message = error.message || '장바구니에 담는 중 오류가 발생했습니다.'
+      setState((prev) => ({ ...prev, error: message }))
+      return { success: false, error: message }
+    }
   }
 
-  const updateQuantity = (productId, quantity) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } })
+  const updateQuantity = async (productId, quantity) => {
+    if (!isAuthenticated) {
+      const guestItems = readGuestCart()
+      const updatedItems = guestItems
+        .map((item) =>
+          item.id === productId
+            ? { ...item, quantity, subtotal: item.price * quantity }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+      writeGuestCart(updatedItems)
+      const { totalAmount, totalQuantity } = calculateTotals(updatedItems)
+      setState((prev) => ({ ...prev, items: updatedItems, totalAmount, totalQuantity }))
+      return
+    }
+
+    try {
+      await updateCartItem(productId, quantity)
+      await loadCart()
+    } catch (error) {
+      setState((prev) => ({ ...prev, error: error.message || '수량 변경에 실패했습니다.' }))
+    }
   }
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' })
+  const removeFromCart = async (productId) => {
+    if (!isAuthenticated) {
+      const guestItems = readGuestCart().filter((item) => item.id !== productId)
+      writeGuestCart(guestItems)
+      const { totalAmount, totalQuantity } = calculateTotals(guestItems)
+      setState((prev) => ({ ...prev, items: guestItems, totalAmount, totalQuantity }))
+      return
+    }
+
+    try {
+      await removeCartItem(productId)
+      await loadCart()
+    } catch (error) {
+      setState((prev) => ({ ...prev, error: error.message || '상품 제거에 실패했습니다.' }))
+    }
   }
 
-  const value = {
-    items: state.items,
-    totalAmount: state.totalAmount,
-    totalQuantity: state.totalQuantity,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
+  const clearCart = async () => {
+    if (!isAuthenticated) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY)
+      setState(initialState)
+      return
+    }
+
+    try {
+      await clearCartRequest()
+      setState(initialState)
+    } catch (error) {
+      setState((prev) => ({ ...prev, error: error.message || '장바구니 비우기에 실패했습니다.' }))
+    }
   }
+
+  const value = useMemo(
+    () => ({
+      items: state.items,
+      totalAmount: state.totalAmount,
+      totalQuantity: state.totalQuantity,
+      isLoading: state.isLoading,
+      error: state.error,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      reload: loadCart,
+    }),
+    [state]
+  )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
